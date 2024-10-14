@@ -5,3 +5,6 @@ conference/bin/
 conference/objs/
 journal/bin/
 journal/objs/
+
+cmake-build-debug/
+CMakeLists.txt

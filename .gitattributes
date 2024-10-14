@@ -1,0 +1,7 @@
+*.h linguist-language=C++
+*.inc linguist-language=Makefile
+
+conference/maps/** linguist-detectable=false
+conference/scenarios/** linguist-detectable=false
+journal/maps/** linguist-detectable=false
+journal/scenarios/** linguist-detectable=false
