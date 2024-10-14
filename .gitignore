@@ -1,0 +1,7 @@
+/.idea/
+data/
+results/
+conference/bin/
+conference/objs/
+journal/bin/
+journal/objs/
