@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# Store the original working directory
-ORIGINAL_DIR=$(pwd)
-
 # Change the working directory to the directory where the script is located
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 
 # Constants
-J=8  # Number of parallel jobs for 'make -j'
+J=10  # Number of parallel jobs for 'make -j'
 
 # Directories
 CONFERENCE_DIR="../conference/build/gmake"
@@ -73,6 +70,3 @@ else
         build "$JOURNAL_DIR"
     fi
 fi
-
-# Return to the original directory
-cd "$ORIGINAL_DIR"

@@ -32,9 +32,9 @@ void TestDAO(const ArgParameters &ap) {
         maps = {ap.heuristic};
     }
 
-    for (std::string map: maps) {
-        ScenarioLoader s(("../../scenarios/dao/" + map).c_str());
-        Map *m = new Map(("../../maps/dao/" + map).c_str());
+    for (const std::string &map: maps) {
+        ScenarioLoader s(("../../scenarios/dao/" + map + ".map.scen").c_str());
+        Map *m = new Map(("../../maps/dao/" + map + ".map").c_str());
         MapEnvironment *me = new MapEnvironment(m);
         me->SetDiagonalCost(1.5);
 
@@ -58,7 +58,7 @@ void TestDAO(const ArgParameters &ap) {
 
 
             // BAE*
-            if (ap.HasAlgorithm("BAE*")) {
+            if (ap.HasAlgorithm("BAE*-o-a")) {
                 BAE<xyLoc, tDirection, MapEnvironment> bae(true, 1.0, 0.5);
                 std::vector<xyLoc> path;
                 Timer timer;
@@ -80,7 +80,7 @@ void TestDAO(const ArgParameters &ap) {
             }
 
             // BAE*-p
-            if (ap.HasAlgorithm("BAE*-p")) {
+            if (ap.HasAlgorithm("BAE*-o-p")) {
                 BAE<xyLoc, tDirection, MapEnvironment> bae(false, 1.0, 0.5);
                 std::vector<xyLoc> path;
                 Timer timer;
@@ -177,7 +177,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -200,7 +200,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -222,7 +222,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -244,7 +244,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -267,7 +267,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -290,7 +290,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbs.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbs.GetNodesExpanded(),
                        dbbs.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -313,7 +313,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -337,7 +337,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -360,7 +360,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -383,7 +383,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -407,7 +407,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -431,7 +431,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 dbbslb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), dbbslb.GetNodesExpanded(),
                        dbbslb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -532,7 +532,7 @@ void TestDAO(const ArgParameters &ap) {
                 timer.StartTimer();
                 btb.GetPath(me, start, goal, me, me, path);
                 timer.EndTimer();
-                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                printf("[R] Path length %1.1f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
                        me->GetPathLength(path), btb.GetNodesExpanded(),
                        btb.GetNecessaryExpansions(), timer.GetElapsedTime());
 
@@ -582,6 +582,9 @@ void TestDAO(const ArgParameters &ap) {
             baelbs.push_back(MapBAELBPair("BAE*-grfrd-p", MapBAELB(ivGRFRD, false, 1.0, 0.5, false)));
 
             for (MapBAELBPair &solver: baelbs) {
+                if (!ap.HasAlgorithm(solver.first)) {
+                    continue;
+                }
                 std::vector<xyLoc> path;
                 Timer timer;
                 std::cout << "[A] " << solver.first.c_str() << "; NB\n"; // Change to WB if withLog=true
