@@ -33,7 +33,7 @@
 const int N = 14;
 
 
-void TestSingleInstance(const ArgParameters &ap) {
+void TestSingleInstance(const ArgParameters &ap, int currId) {
     int gap = std::stoi(ap.heuristic);
     PancakePuzzleState<N> start;
     PancakePuzzleState<N> original;
@@ -48,7 +48,7 @@ void TestSingleInstance(const ArgParameters &ap) {
 
     // Find the correct seed for the current instance
     srandom(0);
-    for (int count = 0; count < ap.instanceId; count++) {
+    for (int count = 0; count < currId; count++) {
         srandom(random());
         for (int x = 0; x < N; x++) {
             random();
@@ -63,7 +63,7 @@ void TestSingleInstance(const ArgParameters &ap) {
         std::swap(original.puzzle[x], original.puzzle[x + random() % (N - x)]);
     }
 
-    std::cout << "[I] GAP-" << gap << " (Pancake problem: " << (ap.instanceId) << " of "
+    std::cout << "[I] GAP-" << gap << " (Pancake problem: " << currId << " of "
               << (ap.instanceId + ap.numOfInstances) << ") Stack: " << original << std::endl;
 
     double optimal_cost = -1.0;
@@ -653,6 +653,6 @@ void TestSingleInstance(const ArgParameters &ap) {
 
 void TestPancake(const ArgParameters &ap) {
     for (int count = ap.instanceId; count < ap.instanceId + ap.numOfInstances; count++) {
-        TestSingleInstance(ap);
+        TestSingleInstance(ap, count);
     }
 }
