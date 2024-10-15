@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Store the original working directory
+ORIGINAL_DIR=$(pwd)
+
+# Change the working directory to the directory where the script is located
+cd "$(dirname "$0")"
+
 # Constants
 J=8  # Number of parallel jobs for 'make -j'
 
@@ -67,3 +73,6 @@ else
         build "$JOURNAL_DIR"
     fi
 fi
+
+# Return to the original directory
+cd "$ORIGINAL_DIR"
