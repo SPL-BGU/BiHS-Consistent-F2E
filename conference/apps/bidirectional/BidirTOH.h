@@ -9,8 +9,8 @@
 #ifndef BidirTOH_h
 #define BidirTOH_h
 
-#include <stdio.h>
+#include "ArgParameters.h"
 
-void TOHTest(int pdb, int first=0, int last=50);
+void TestTOH(const ArgParameters &ap);
 
-#endif /* BidirTOH_hpp */
+#endif /* BidirTOH_h */

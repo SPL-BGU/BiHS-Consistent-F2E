@@ -5,10 +5,9 @@
 #ifndef HOG2_PRIVATE_BIDIRROADMAP_H
 #define HOG2_PRIVATE_BIDIRROADMAP_H
 
-#include <string>
-#include <iostream>
 #include "RoadMap.h"
+#include "ArgParameters.h"
 
-void TestRoadMaps(const std::string &mapName, int instanceId);
+void TestRoad(const ArgParameters &ap);
 
 #endif //HOG2_PRIVATE_BIDIRROADMAP_H

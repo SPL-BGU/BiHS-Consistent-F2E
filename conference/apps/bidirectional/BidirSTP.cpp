@@ -10,9 +10,7 @@
 #include "MNPuzzle.h"
 #include "NBS.h"
 #include "DVCBS.h"
-#include "IDAStar.h"
 #include "MM.h"
-#include "BSStar.h"
 #include "BAE.h"
 #include "TemplateAStar.h"
 #include "Baseline.h"
@@ -139,15 +137,15 @@ MNPuzzleState<4, 4> GetKorfInstance(int which) {
     return s;
 }
 
-void TestSTP(std::string alg, int instanceId, int md_ignore) {
+void TestSTP(const ArgParameters &ap) {
+    int md_ignore = 0;
+    if (ap.heuristic != "MD" && ap.heuristic != "md") {
+        md_ignore = std::stoi(ap.heuristic);
+    }
     MNPuzzle<4, 4> mnp(md_ignore);
 
-    int startId = 0;
-    int lastId = 100;
-    if (instanceId > -1) {
-        startId = instanceId;
-        lastId = startId + 1;
-    }
+    int startId = ap.instanceId;
+    int lastId = startId + ap.numOfInstances;
 
     for (int x = startId; x < lastId; x++) // 547 to 540
     {
@@ -162,7 +160,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         start = GetKorfInstance(x);
 
         // BAE*-a
-        if (alg == "BAE*-o-a") {
+        if (ap.HasAlgorithm("BAE*-o-a")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             BAE<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4 >> bae;
             Timer timer;
@@ -184,7 +182,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         // BAE*-p
-        if (alg == "BAE*-o-p") {
+        if (ap.HasAlgorithm("BAE*-o-p")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             BAE<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4 >> bae(false);
             Timer timer;
@@ -206,7 +204,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         // A*
-        if (alg == "A*") {
+        if (ap.HasAlgorithm("A*")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> astar;
             Timer timer;
@@ -228,7 +226,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         // NBS
-        if (alg == "NBS") {
+        if (ap.HasAlgorithm("NBS")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             NBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, NBSQueue<MNPuzzleState<4, 4>, 1, true>> nbs(false, true);
             Timer timer;
@@ -253,7 +251,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         // DVCBS
-        if (alg == "DVCBS") {
+        if (ap.HasAlgorithm("DVCBS")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DVCBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, DVCBSQueue<MNPuzzleState<4, 4>, 1, false >> dvcbs(
                     false, true);
@@ -279,7 +277,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-a
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-a")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinB> dbbs(SideCriterion::Alt);
             Timer timer;
@@ -302,7 +300,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-p
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-p")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinB> dbbs(SideCriterion::Cardinality);
             Timer timer;
@@ -325,7 +323,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-a-MaxTot
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-a-MaxTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MaxTot> dbbs(SideCriterion::Alt);
             Timer timer;
@@ -348,7 +346,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-a-MinTot
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-a-MinTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinTot> dbbs(SideCriterion::Alt);
             Timer timer;
@@ -371,7 +369,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-o-MaxTot
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-o-MaxTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MaxTot> dbbs(SideCriterion::OptCount);
             Timer timer;
@@ -394,7 +392,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBS-o-MinTot
-        if (alg == "DBBS") {
+        if (ap.HasAlgorithm("DBBS-o-MinTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBS<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinTot> dbbs(SideCriterion::OptCount);
             Timer timer;
@@ -417,7 +415,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-a
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-a")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinB> dbbslb(SideCriterion::Alt);
             Timer timer;
@@ -440,9 +438,10 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-p
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-p")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
-            DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinB> dbbslb(SideCriterion::Cardinality);
+            DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinB> dbbslb(
+                    SideCriterion::Cardinality);
             Timer timer;
             goal.Reset();
             std::cout << "[A] DBBSLB-p; NB\n";
@@ -463,7 +462,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-a-MaxTot
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-a-MaxTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MaxTot> dbbslb(SideCriterion::Alt);
             Timer timer;
@@ -486,7 +485,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-a-MinTot
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-a-MinTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinTot> dbbslb(SideCriterion::Alt);
             Timer timer;
@@ -509,7 +508,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-o-MaxTot
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-o-MaxTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MaxTot> dbbslb(SideCriterion::OptCount);
             Timer timer;
@@ -532,7 +531,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //DBBSLB-o-MinTot
-        if (alg == "DBBSLB") {
+        if (ap.HasAlgorithm("DBBSLB-o-MinTot")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             DBBSLB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>, MinCriterion::MinTot> dbbslb(SideCriterion::OptCount);
             Timer timer;
@@ -556,7 +555,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
 
 
         // GMX
-        if (alg == "GMX") {
+        if (ap.HasAlgorithm("GMX")) {
             std::cout << "[A] GMX; NB\n";
             GMX<MNPuzzleState<4, 4>> gmx;
             Timer timer;
@@ -582,7 +581,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
                    optimal_cost, expanded, expanded, timer.GetElapsedTime());
         }
 
-        if (alg == "RA*") {
+        if (ap.HasAlgorithm("RA*")) {
             Timer timer;
             TemplateAStar<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4>> rastar;
             goal.Reset();
@@ -605,7 +604,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //NGMX
-        if (alg == "NGMX") {
+        if (ap.HasAlgorithm("NGMX")) {
             Timer timer;
             CalculateWVC<MNPuzzleState<4, 4>> calculateWVC;
             double C = -1;
@@ -649,7 +648,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //BTB-conn
-        if (alg == "BTB") {
+        if (ap.HasAlgorithm("BTB-conn")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             BTB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4 >> btb(BTBPolicy::MostConnected);
             goal.Reset();
@@ -672,7 +671,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         }
 
         //BTB-nbs
-        if (alg == "BTB") {
+        if (ap.HasAlgorithm("BTB-nbs")) {
             std::vector<MNPuzzleState<4, 4>> solutionPath;
             BTB<MNPuzzleState<4, 4>, slideDir, MNPuzzle<4, 4 >> btb(BTBPolicy::Alternating);
             goal.Reset();
@@ -732,7 +731,7 @@ void TestSTP(std::string alg, int instanceId, int md_ignore) {
         baelbs.push_back(STPBAELBPair("BAE*-grfrd-p", STPBAELB(ivGRFRD, false)));
 
         for (STPBAELBPair &solver: baelbs) {
-            if (solver.first != alg) {
+            if (!ap.HasAlgorithm(solver.first)) {
                 continue;
             }
             std::cout << "[A] " << solver.first.c_str() << "; WB\n";

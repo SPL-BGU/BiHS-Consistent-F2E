@@ -19,25 +19,21 @@
 #define RMBAELBPair std::pair<std::string, BAELB<intersection, neighbor, RoadMap>>
 #define RMBAELB BAELB<intersection, neighbor, RoadMap>
 
-void TestRoadMaps(const std::string &mapName, int instanceId) {
+void TestRoad(const ArgParameters &ap) {
     Timer t1;
-    std::string graphStr = "../../maps/roadmaps/USA-road-t." + mapName + ".gr";
-    std::string coordStr = "../../maps/roadmaps/USA-road-d." + mapName + ".co";
+    std::string graphStr = "../../maps/roadmaps/USA-road-t.COL.gr";
+    std::string coordStr = "../../maps/roadmaps/USA-road-d.COL.co";
     RoadMap rm(graphStr.c_str(), coordStr.c_str(), false);
 
-    int starti = 0;
-    int endi = 100;
-    if(instanceId>=0){
-        starti=instanceId;
-        endi=instanceId+1;
-    }
+    int starti = ap.instanceId;
+    int endi = starti + ap.numOfInstances;
 
     for (int i = starti; i < endi; i++) {
-        srandom(i*16);
+        srandom(i * 16);
         std::vector<intersection> path;
         node *n1 = rm.GetGraph()->GetRandomNode();
         node *n2 = rm.GetGraph()->GetRandomNode();
-        std::cout << "[I] " << mapName << " ("
+        std::cout << "[I] COL ("
                   << n1->GetLabelF(GraphSearchConstants::kXCoordinate) << ","
                   << n1->GetLabelF(GraphSearchConstants::kYCoordinate)
                   << ") (" << n2->GetLabelF(GraphSearchConstants::kXCoordinate) << ","
@@ -49,7 +45,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         double optimal_cost = -1.0;
 
         //BAE*-o-a
-        if (false) {
+        if (ap.HasAlgorithm("BAE*-o-a")) {
             BAE<intersection, neighbor, RoadMap> bae(true);
             std::cout << "[A] BAE*-o-a; NB\n";
             t1.StartTimer();
@@ -69,7 +65,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //BAE*-o-p
-        if (false) {
+        if (ap.HasAlgorithm("BAE*-o-p")) {
             BAE<intersection, neighbor, RoadMap> bae(false);
             std::cout << "[A] BAE*-o-p; NB\n";
             t1.StartTimer();
@@ -89,7 +85,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //A*
-        if (false) {
+        if (ap.HasAlgorithm("A*")) {
             std::cout << "[A] A*; NB\n";
             TemplateAStar<intersection, neighbor, RoadMap> astar;
             t1.StartTimer();
@@ -109,7 +105,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //NBS
-        if (false) {
+        if (ap.HasAlgorithm("NBS")) {
             NBS<intersection, neighbor, RoadMap, NBSQueue<intersection, 1, false >> nbs(false, true);
             std::cout << "[A] NBS; NB\n";
             t1.StartTimer();
@@ -129,7 +125,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DVCBS
-        if (false) {
+        if (ap.HasAlgorithm("DVCBS")) {
             DVCBS<intersection, neighbor, RoadMap, DVCBSQueue<intersection, 1, false >> dvcbs(false, true);
             std::cout << "[A] DVCBS; NB\n";
             t1.StartTimer();
@@ -149,8 +145,8 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-a
-        if (false) {
-            DBBS <intersection, neighbor, RoadMap, MinCriterion::MinB> dbbs( SideCriterion::Alt);
+        if (ap.HasAlgorithm("DBBS-a")) {
+            DBBS<intersection, neighbor, RoadMap, MinCriterion::MinB> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a; NB\n";
             t1.StartTimer();
             dbbs.GetPath(&rm, start, goal, &rm, &rm, path);
@@ -169,7 +165,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-p
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-p")) {
             DBBS<intersection, neighbor, RoadMap, MinCriterion::MinB> dbbs(SideCriterion::Cardinality);
             std::cout << "[A] DBBS-p; NB\n";
             t1.StartTimer();
@@ -189,7 +185,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-a-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-a-MaxTot")) {
             DBBS<intersection, neighbor, RoadMap, MinCriterion::MaxTot> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a-MaxTot; NB\n";
             t1.StartTimer();
@@ -209,7 +205,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-a-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-a-MinTot")) {
             DBBS<intersection, neighbor, RoadMap, MinCriterion::MinTot> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a-MinTot; NB\n";
             t1.StartTimer();
@@ -229,7 +225,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-o-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-o-MaxTot")) {
             DBBS<intersection, neighbor, RoadMap, MinCriterion::MaxTot> dbbs(SideCriterion::OptCount);
             std::cout << "[A] DBBS-o-MaxTot; NB\n";
             t1.StartTimer();
@@ -249,7 +245,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBS-o-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-o-MinTot")) {
             DBBS<intersection, neighbor, RoadMap, MinCriterion::MinTot> dbbs(SideCriterion::OptCount);
             std::cout << "[A] DBBS-o-MinTot; NB\n";
             t1.StartTimer();
@@ -269,7 +265,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-a
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MinB> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a; NB\n";
             t1.StartTimer();
@@ -289,7 +285,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-p
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-p")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MinB> dbbslb(SideCriterion::Cardinality);
             std::cout << "[A] DBBSLB-p; NB\n";
             t1.StartTimer();
@@ -309,7 +305,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-a-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a-MaxTot")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MaxTot> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a-MaxTot; NB\n";
             t1.StartTimer();
@@ -329,7 +325,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-a-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a-MinTot")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MinTot> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a-MinTot; NB\n";
             t1.StartTimer();
@@ -349,7 +345,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-o-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-o-MaxTot")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MaxTot> dbbslb(SideCriterion::OptCount);
             std::cout << "[A] DBBSLB-o-MaxTot; NB\n";
             t1.StartTimer();
@@ -369,7 +365,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         //DBBSLB-o-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-o-MinTot")) {
             DBBSLB<intersection, neighbor, RoadMap, MinCriterion::MinTot> dbbslb(SideCriterion::OptCount);
             std::cout << "[A] DBBSLB-o-MinTot; NB\n";
             t1.StartTimer();
@@ -391,7 +387,7 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
 
 
         // GMX
-        if (false) {
+        if (ap.HasAlgorithm("GMX")) {
             std::cout << "[A] GMX; NB\n";
             GMX<intersection> gmx;
             t1.StartTimer();
@@ -418,8 +414,8 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
         // NGMX
-        if (true) {
-            CalculateWVC <intersection> calculateWVC;
+        if (ap.HasAlgorithm("NGMX")) {
+            CalculateWVC<intersection> calculateWVC;
             int C = -1;
             std::map<int, int> gCountMapForwardSingle;
             std::map<int, int> gCountMapBackwardSingle;
@@ -462,7 +458,6 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         }
 
 
-
         std::vector<RMBAELBPair> baelbs;
         baelbs.push_back(RMBAELBPair("BAE*-fd-a", RMBAELB(ivF, ivD, true, 1.0, 1.0, false)));
         baelbs.push_back(RMBAELBPair("BAE*-fd-p", RMBAELB(ivF, ivD, false, 1.0, 1.0, false)));
@@ -500,6 +495,10 @@ void TestRoadMaps(const std::string &mapName, int instanceId) {
         baelbs.push_back(RMBAELBPair("BAE*-grfrd-p", RMBAELB(ivGRFRD, false, 1.0, 1.0, false)));
 
         for (RMBAELBPair &solver: baelbs) {
+            if (!ap.HasAlgorithm(solver.first)) {
+                continue;
+            }
+
             std::cout << "[A] " << solver.first.c_str() << "; NB\n"; // Change to WB if withLog=true
             t1.StartTimer();
             solver.second.GetPath(&rm, start, goal, &rm, &rm, path);

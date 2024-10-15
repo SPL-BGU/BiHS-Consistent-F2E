@@ -9,9 +9,8 @@
 #ifndef BidirSTP_h
 #define BidirSTP_h
 
-#include <stdio.h>
-#include <string>
+#include "ArgParameters.h"
 
-void TestSTP(std::string alg, int instanceId=-1, int md_ignore=0);
+void TestSTP(const ArgParameters &ap);
 
-#endif /* BidirSTP_hpp */
+#endif /* BidirSTP_h */

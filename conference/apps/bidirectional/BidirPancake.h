@@ -9,8 +9,8 @@
 #ifndef BidirPancake_hpp
 #define BidirPancake_hpp
 
-#include <string>
+#include "ArgParameters.h"
 
-void TestPancake(int gap, const std::string& alg, int instanceId=-1);
+void TestPancake(const ArgParameters &ap);
 
 #endif /* BidirPancake_hpp */

@@ -36,13 +36,12 @@ Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal) {
     TOHState<pdb2Disks> absTohState2;
 
 
-    TOHPDB<pdb1Disks, numDisks, pdb2Disks> *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1,
-                                                                                              goal); // top disks
-    TOHPDB<pdb2Disks, numDisks> *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
+    auto *pdb1 = new TOHPDB<pdb1Disks, numDisks, pdb2Disks>(&absToh1, goal); // top disks
+    auto *pdb2 = new TOHPDB<pdb2Disks, numDisks>(&absToh2, goal); // bottom disks
     pdb1->BuildPDB(goal, std::thread::hardware_concurrency());
     pdb2->BuildPDB(goal, std::thread::hardware_concurrency());
 
-    Heuristic<TOHState<numDisks>> *h = new Heuristic<TOHState<numDisks>>;
+    auto *h = new Heuristic<TOHState<numDisks>>;
 
     h->lookups.resize(0);
     h->lookups.push_back({kAddNode, 1, 2});
@@ -56,9 +55,7 @@ Heuristic<TOHState<numDisks>> *BuildPDB(const TOHState<numDisks> &goal) {
 }
 
 template<int N, int pdb1Disks>
-void TestTOH(int first, int last) {
-
-
+void TestTOH(ArgParameters ap) {
     BSStar<TOHState<N>, TOHMove, TOH<N >> bs;
     MM<TOHState<N>, TOHMove, TOH<N>> mm;
 
@@ -75,7 +72,7 @@ void TestTOH(int first, int last) {
     int table2[] = {145008714, 165971878, 154717942, 218927374, 182772845, 5808407, 19155194, 137438954, 13143598,
                     124513215, 132635260, 39667704, 2462244, 41006424, 214146208, 54305743};
 
-    for (int count = first; count < last; count++) {
+    for (int count = ap.instanceId; count < ap.instanceId + ap.numOfInstances; count++) {
 
         srandom(table[count & 0xF] ^ table2[(count >> 4) & 0xF]);
 
@@ -99,13 +96,13 @@ void TestTOH(int first, int last) {
 
         Timer timer;
 
-        std::cout << "[I] PDB-" << pdb1Disks << " (ToH problem: " << count << " of " << last << ") Stacks: " << s
-                  << std::endl;
+        std::cout << "[I] PDB-" << pdb1Disks << " (ToH problem: " << count << " of "
+                  << (ap.instanceId + ap.numOfInstances) << ") Stacks: " << s << std::endl;
 
         double optimal_cost = -1.0;
 
         // BAE*-o-a
-        if (true) {
+        if (ap.HasAlgorithm("BAE*-o-a")) {
             BAE<TOHState<N>, TOHMove, TOH<N >> bae(true);
             std::cout << "[A] BAE*-o-a; NB\n";
             timer.StartTimer();
@@ -125,7 +122,7 @@ void TestTOH(int first, int last) {
         }
 
         // BAE*-o-p
-        if (true) {
+        if (ap.HasAlgorithm("BAE*-o-p")) {
             BAE<TOHState<N>, TOHMove, TOH<N >> bae(false);
             std::cout << "[A] BAE*-o-p; NB\n";
             timer.StartTimer();
@@ -145,7 +142,7 @@ void TestTOH(int first, int last) {
         }
 
         // A*
-        if (true) {
+        if (ap.HasAlgorithm("A*")) {
             TemplateAStar<TOHState<N>, TOHMove, TOH<N>> astar;
             std::cout << "[A] A*; NB\n";
             astar.SetHeuristic(f);
@@ -166,7 +163,7 @@ void TestTOH(int first, int last) {
         }
 
         //NBS
-        if (true) {
+        if (ap.HasAlgorithm("NBS")) {
             NBS<TOHState<N>, TOHMove, TOH<N>, NBSQueue<TOHState<N>, 1, true >> nbs(false, true);
             std::cout << "[A] NBS; NB\n";
             timer.StartTimer();
@@ -187,7 +184,7 @@ void TestTOH(int first, int last) {
         }
 
         //DVCBS
-        if (true) {
+        if (ap.HasAlgorithm("DVCBS")) {
             DVCBS<TOHState<N>, TOHMove, TOH<N>, DVCBSQueue<TOHState<N>, 1, false >> dvcbs(false, true);
             std::cout << "[A] DVCBS; NB\n";
             timer.StartTimer();
@@ -207,8 +204,8 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-a
-        if (false) {
-            DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinB > dbbs(SideCriterion::Alt);
+        if (ap.HasAlgorithm("DBBS-a")) {
+            DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinB> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a; NB\n";
             timer.StartTimer();
             dbbs.GetPath(&toh, s, g, f, b, thePath);
@@ -227,7 +224,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-p
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-p")) {
             DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinB> dbbs(SideCriterion::Cardinality);
             std::cout << "[A] DBBS-p; NB\n";
             timer.StartTimer();
@@ -247,7 +244,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-a-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-a-MaxTot")) {
             DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MaxTot> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a-MaxTot; NB\n";
             timer.StartTimer();
@@ -267,7 +264,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-a-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-a-MinTot")) {
             DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinTot> dbbs(SideCriterion::Alt);
             std::cout << "[A] DBBS-a-MinTot; NB\n";
             timer.StartTimer();
@@ -287,7 +284,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-o-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-o-MaxTot")) {
             DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MaxTot> dbbs(SideCriterion::OptCount);
             std::cout << "[A] DBBS-o-MaxTot; NB\n";
             timer.StartTimer();
@@ -307,7 +304,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBS-o-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBS-o-MinTot")) {
             DBBS<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinTot> dbbs(SideCriterion::OptCount);
             std::cout << "[A] DBBS-o-MinTot; NB\n";
             timer.StartTimer();
@@ -327,7 +324,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-a
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinB> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a; NB\n";
             timer.StartTimer();
@@ -347,7 +344,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-p
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-p")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinB> dbbslb(SideCriterion::Cardinality);
             std::cout << "[A] DBBSLB-p; NB\n";
             timer.StartTimer();
@@ -367,7 +364,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-a-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a-MaxTot")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MaxTot> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a-MaxTot; NB\n";
             timer.StartTimer();
@@ -387,7 +384,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-a-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-a-MinTot")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinTot> dbbslb(SideCriterion::Alt);
             std::cout << "[A] DBBSLB-a-MinTot; NB\n";
             timer.StartTimer();
@@ -407,7 +404,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-o-MaxTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-o-MaxTot")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MaxTot> dbbslb(SideCriterion::OptCount);
             std::cout << "[A] DBBSLB-o-MaxTot; NB\n";
             timer.StartTimer();
@@ -427,7 +424,7 @@ void TestTOH(int first, int last) {
         }
 
         //DBBSLB-o-MinTot
-        if (false) {
+        if (ap.HasAlgorithm("DBBSLB-o-MinTot")) {
             DBBSLB<TOHState<N>, TOHMove, TOH<N>, MinCriterion::MinTot> dbbslb(SideCriterion::OptCount);
             std::cout << "[A] DBBSLB-o-MinTot; NB\n";
             timer.StartTimer();
@@ -447,7 +444,7 @@ void TestTOH(int first, int last) {
         }
 
         // GMX
-        if (false) {
+        if (ap.HasAlgorithm("GMX")) {
             std::cout << "[A] GMX; NB\n";
             GMX<TOHState<N>> gmx;
             timer.StartTimer();
@@ -471,7 +468,7 @@ void TestTOH(int first, int last) {
         }
 
         //NGMX
-        if (true) {
+        if (ap.HasAlgorithm("NGMX")) {
             CalculateWVC<TOHState<N>> calculateWVC;
             double C = -1;
             std::map<int, int> gCountMapForwardSingle;
@@ -512,7 +509,7 @@ void TestTOH(int first, int last) {
         }
 
         //BTB-conn
-        if(true) {
+        if (ap.HasAlgorithm("BTB-conn")) {
             BTB<TOHState<N>, TOHMove, TOH<N >> btb(BTBPolicy::MostConnected);
             std::cout << "[A] BTB-conn; NB\n";
             timer.StartTimer();
@@ -532,7 +529,7 @@ void TestTOH(int first, int last) {
         }
 
         //BTB-nbs
-        if (true) {
+        if (ap.HasAlgorithm("BTB-nbs")) {
             BTB<TOHState<N>, TOHMove, TOH<N >> btb(BTBPolicy::Alternating);
             std::cout << "[A] BTB-nbs; NB\n";
             timer.StartTimer();
@@ -590,22 +587,25 @@ void TestTOH(int first, int last) {
 
 
         for (ToHBAELBPair &solver: baelbs) {
-            std::cout << "[A] " << solver.first.c_str() << "; WB\n";
-            timer.StartTimer();
-            solver.second.GetPath(&toh, s, g, f, b, thePath);
-            timer.EndTimer();
-            printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-                   toh.GetPathLength(thePath), solver.second.GetNodesExpanded(),
-                   solver.second.GetNecessaryExpansions(), timer.GetElapsedTime());
+            if (ap.HasAlgorithm(solver.first)) {
+                std::cout << "[A] " << solver.first.c_str() << "; WB\n";
+                timer.StartTimer();
+                solver.second.GetPath(&toh, s, g, f, b, thePath);
+                timer.EndTimer();
+                printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+                       toh.GetPathLength(thePath), solver.second.GetNodesExpanded(),
+                       solver.second.GetNecessaryExpansions(), timer.GetElapsedTime());
 
-            // test optimality
-            if (optimal_cost < 0.0) optimal_cost = toh.GetPathLength(thePath);
-            else if (optimal_cost != toh.GetPathLength(thePath)) {
-                printf("%s reported bad value!! optimal %1.0f; reported %1.0f;\n", solver.first.c_str(),
-                       optimal_cost, toh.GetPathLength(thePath));
-                exit(0);
+                // test optimality
+                if (optimal_cost < 0.0) optimal_cost = toh.GetPathLength(thePath);
+                else if (optimal_cost != toh.GetPathLength(thePath)) {
+                    printf("%s reported bad value!! optimal %1.0f; reported %1.0f;\n", solver.first.c_str(),
+                           optimal_cost, toh.GetPathLength(thePath));
+                    exit(0);
+                }
+                solver.second.ClearMemory();
             }
-            solver.second.ClearMemory();
+
         }
 
 
@@ -623,24 +623,23 @@ void TestTOH(int first, int last) {
 
 }
 
-void TOHTest(int pdb, int first, int last) {
+void TestTOH(const ArgParameters &ap) {
+    int pdb = stoi(ap.heuristic);
     switch (pdb) {
         case 2:
-            TestTOH<12, 2>(first, last);
+            TestTOH<12, 2>(ap);
             break;
         case 4:
-            TestTOH<12, 4>(first, last);
+            TestTOH<12, 4>(ap);
             break;
         case 6:
-            TestTOH<12, 6>(first, last);
+            TestTOH<12, 6>(ap);
             break;
         case 8:
-            TestTOH<12, 8>(first, last);
+            TestTOH<12, 8>(ap);
             break;
         default:
             assert(!"Non-programmed PDB value");
-            break;
-
     }
     exit(0);
 }

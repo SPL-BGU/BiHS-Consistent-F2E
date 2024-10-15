@@ -33,7 +33,8 @@
 const int N = 14;
 
 
-void TestSingleInstance(int gap, const std::string &alg, int instanceId, int total) {
+void TestSingleInstance(const ArgParameters &ap) {
+    int gap = std::stoi(ap.heuristic);
     PancakePuzzleState<N> start;
     PancakePuzzleState<N> original;
     PancakePuzzleState<N> goal;
@@ -47,7 +48,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
 
     // Find the correct seed for the current instance
     srandom(0);
-    for (int count = 0; count < instanceId; count++) {
+    for (int count = 0; count < ap.instanceId; count++) {
         srandom(random());
         for (int x = 0; x < N; x++) {
             random();
@@ -62,13 +63,13 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
         std::swap(original.puzzle[x], original.puzzle[x + random() % (N - x)]);
     }
 
-    std::cout << "[I] GAP-" << gap << " (Pancake problem: " << (instanceId) << " of " << total << ") Stack: "
-              << original << std::endl;
+    std::cout << "[I] GAP-" << gap << " (Pancake problem: " << (ap.instanceId) << " of "
+              << (ap.instanceId + ap.numOfInstances) << ") Stack: " << original << std::endl;
 
     double optimal_cost = -1.0;
 
     // BAE*-o-a
-    if (alg == "BAE*-o-a") {
+    if (ap.HasAlgorithm("BAE*-o-a")) {
         BAE<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N >> bae(true);
         start = original;
         std::cout << "[A] BAE*-o-a; NB\n";
@@ -89,7 +90,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     // BAE*-o-p
-    if (alg == "BAE*-o-p") {
+    if (ap.HasAlgorithm("BAE*-o-p")) {
         BAE<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N >> bae(false);
         start = original;
         std::cout << "[A] BAE*-o-p; NB\n";
@@ -110,7 +111,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     //A*
-    if (alg == "A*") {
+    if (ap.HasAlgorithm("A*")) {
         TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> astar;
         std::vector<PancakePuzzleState<N>> path;
         start = original;
@@ -132,7 +133,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     //NBS
-    if (alg == "NBS") {
+    if (ap.HasAlgorithm("NBS")) {
         NBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, NBSQueue<PancakePuzzleState<N>, 1, false >> nbs(
                 false, true);
         std::vector<PancakePuzzleState<N>> path;
@@ -155,7 +156,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     //DVCBS
-    if (alg == "DVCBS") {
+    if (ap.HasAlgorithm("DVCBS")) {
         DVCBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, DVCBSQueue<PancakePuzzleState<N>, 1, false >> dvcbs(
                 false, true);
         std::vector<PancakePuzzleState<N>> path;
@@ -178,270 +179,281 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     //DBBS-a
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinB > dbbs(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-a")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinB> dbbs(SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-a; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-a reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-a reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBS-p
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinB > dbbs(SideCriterion::Cardinality);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-p")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinB> dbbs(
+                SideCriterion::Cardinality);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-p; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-p reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-p reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBS-a-MaxTot
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MaxTot > dbbs(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-a-MaxTot")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MaxTot> dbbs(
+                SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-a-MaxTot; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-a-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-a-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBS-a-MinTot
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinTot > dbbs(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-a-MinTot")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinTot> dbbs(
+                SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-a-MinTot; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-a-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-a-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBS-o-MaxTot
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MaxTot > dbbs(SideCriterion::OptCount);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-o-MaxTot")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MaxTot> dbbs(
+                SideCriterion::OptCount);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-o-MaxTot; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-o-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-o-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBS-o-MinTot
-	if (alg == "DBBS") {
-		DBBS<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinTot > dbbs(SideCriterion::OptCount);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBS-o-MinTot")) {
+        DBBS<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinTot> dbbs(
+                SideCriterion::OptCount);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBS-o-MinTot; NB\n";
-		t1.StartTimer();
-		dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
-	    dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBS-o-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbs.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbs.GetNodesExpanded(),
+               dbbs.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBS-o-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-a
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinB > dbbslb(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-a")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinB> dbbslb(
+                SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-a; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-a reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-a reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-p
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinB > dbbslb(SideCriterion::Cardinality);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-p")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinB> dbbslb(
+                SideCriterion::Cardinality);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-p; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-p reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-p reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-a-MaxTot
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MaxTot > dbbslb(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-a-MaxTot")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MaxTot> dbbslb(
+                SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-a-MaxTot; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-a-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-a-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-a-MinTot
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinTot > dbbslb(SideCriterion::Alt);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-a-MinTot")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinTot> dbbslb(
+                SideCriterion::Alt);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-a-MinTot; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-a-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-a-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-o-MaxTot
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MaxTot > dbbslb(SideCriterion::OptCount);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-o-MaxTot")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MaxTot> dbbslb(
+                SideCriterion::OptCount);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-o-MaxTot; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-o-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
+
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-o-MaxTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
 
     //DBBSLB-o-MinTot
-	if (alg == "DBBSLB") {
-		DBBSLB<PancakePuzzleState < N>, PancakePuzzleAction, PancakePuzzle < N >, MinCriterion::MinTot > dbbslb(SideCriterion::OptCount);
-		std::vector<PancakePuzzleState<N>> path;
-		start = original;
+    if (ap.HasAlgorithm("DBBSLB-o-MinTot")) {
+        DBBSLB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>, MinCriterion::MinTot> dbbslb(
+                SideCriterion::OptCount);
+        std::vector<PancakePuzzleState<N>> path;
+        start = original;
         std::cout << "[A] DBBSLB-o-MinTot; NB\n";
-		t1.StartTimer();
-		dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
-		t1.EndTimer();
-		printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
-	    pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
-	    dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
-		
-		// test optimality
-		if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
-		else if (optimal_cost != pancake.GetPathLength(path)) {
-			printf("DBBSLB-o-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
-				   optimal_cost, pancake.GetPathLength(path));
-			exit(0);
-		}
-	}
+        t1.StartTimer();
+        dbbslb.GetPath(&pancake, start, goal, &pancake, &pancake2, path);
+        t1.EndTimer();
+        printf("[R] Path length %1.0f; %llu expanded; %llu necessary; %1.2fs elapsed\n",
+               pancake.GetPathLength(path), dbbslb.GetNodesExpanded(),
+               dbbslb.GetNecessaryExpansions(), t1.GetElapsedTime());
 
-    if (alg == "GMX") {
+        // test optimality
+        if (optimal_cost < 0.0) optimal_cost = pancake.GetPathLength(path);
+        else if (optimal_cost != pancake.GetPathLength(path)) {
+            printf("DBBSLB-o-MinTot reported bad value!! optimal %1.0f; reported %1.0f;\n",
+                   optimal_cost, pancake.GetPathLength(path));
+            exit(0);
+        }
+    }
+
+    if (ap.HasAlgorithm("GMX")) {
         std::cout << "[A] GMX; NB\n";
         GMX<PancakePuzzleState<N>> gmx;
         t1.StartTimer();
@@ -468,7 +480,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
                optimal_cost, expanded, expanded, t1.GetElapsedTime());
     }
 
-    if(alg=="RA*") {
+    if (ap.HasAlgorithm("RA*")) {
         std::vector<PancakePuzzleState<N>> path;
         start = original;
         TemplateAStar<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N>> rastar;
@@ -491,7 +503,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
         }
     }
 
-    if(alg=="NGMX") {
+    if (ap.HasAlgorithm("NGMX")) {
         CalculateWVC<PancakePuzzleState<N>> calculateWVC;
         double C = -1;
         std::map<int, int> gCountMapForwardSingle;
@@ -532,11 +544,11 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
         t1.EndTimer();
         std::cout << "[A] NGMX; NB\n";
         printf("[R] Path length %1.0f; %d expanded; %d necessary; %1.2fs elapsed\n",
-               C, expanded, expanded, times[0]+times[1]+t1.GetElapsedTime());
+               C, expanded, expanded, times[0] + times[1] + t1.GetElapsedTime());
     }
 
     //BTB-conn
-    if (alg == "BTB") {
+    if (ap.HasAlgorithm("BTB-conn")) {
         BTB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N >> btb(BTBPolicy::MostConnected);
         std::vector<PancakePuzzleState<N>> path;
         start = original;
@@ -558,7 +570,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 
     //BTB-nbs
-    if (alg == "BTB") {
+    if (ap.HasAlgorithm("BTB-nbs")) {
         BTB<PancakePuzzleState<N>, PancakePuzzleAction, PancakePuzzle<N >> btb(BTBPolicy::Alternating);
         std::vector<PancakePuzzleState<N>> path;
         start = original;
@@ -579,7 +591,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
         }
     }
 
-    std::vector<PancakeBAELBPair> baelbs;
+    std::vector<PancakeBAELBPair > baelbs;
     baelbs.push_back(PancakeBAELBPair("BAE*-fd-a", PancakeBAELB(ivF, ivD)));
     baelbs.push_back(PancakeBAELBPair("BAE*-fd-p", PancakeBAELB(ivF, ivD, false)));
     baelbs.push_back(PancakeBAELBPair("BAE*-rfrd-a", PancakeBAELB(ivRF, ivRD)));
@@ -616,7 +628,7 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     baelbs.push_back(PancakeBAELBPair("BAE*-grfrd-p", PancakeBAELB(ivGRFRD, false)));
 
     for (PancakeBAELBPair &solver: baelbs) {
-        if (solver.first != alg) {
+        if (!ap.HasAlgorithm(solver.first)) {
             continue;
         }
         start = original;
@@ -639,19 +651,8 @@ void TestSingleInstance(int gap, const std::string &alg, int instanceId, int tot
     }
 }
 
-void TestPancakeRandom(int gap, const std::string &alg, int first, int last) {
-    for (int count = first; count < last; count++) {
-        TestSingleInstance(gap, alg, count, last);
+void TestPancake(const ArgParameters &ap) {
+    for (int count = ap.instanceId; count < ap.instanceId + ap.numOfInstances; count++) {
+        TestSingleInstance(ap);
     }
-    exit(0);
-}
-
-void TestPancake(int gap, const std::string &alg, int instanceId) {
-    if (instanceId == -1) {
-        TestPancakeRandom(gap, alg, 0, 50);
-    } else {
-        TestPancakeRandom(gap, alg, instanceId, instanceId + 1);
-    }
-
-    exit(0);
 }
