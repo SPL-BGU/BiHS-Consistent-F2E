@@ -3,6 +3,8 @@
 <a href="https://github.com/SPL-BGU/BiHS-Consistent-F2E/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
 </p>
 
+You can find the paper in [https://doi.org/10.24963/ijcai.2023/625 ](https://doi.org/10.24963/ijcai.2023/625).
+
 The code for his repo is based on Prof. Nathan Sturtevant's HOG2 implementation which can be
 found [here](https://github.com/nathansttt/hog2). <br/>
 The code has been mainly run on the Ubuntu operating system using WSL and natively. <br/>
