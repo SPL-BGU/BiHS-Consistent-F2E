@@ -1,10 +1,17 @@
-/.idea/
+# Raw and final data
 data/
 results/
+
+# Compiled objects
 conference/bin/
 conference/objs/
 journal/bin/
 journal/objs/
 
+# CLion
+.idea/
 cmake-build-debug/
 CMakeLists.txt
+
+# Virtual env
+wvenv/
