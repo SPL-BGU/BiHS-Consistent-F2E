@@ -11,6 +11,7 @@ usage() {
     echo "  -r, --road       Run all algorithms for the Road Navigation domain."
     echo "  -d, --dao        Run all algorithms for the DAO domain."
     echo "  -l, --linear     Run the linear combination experiment."
+    echo "  --tohlinear      Run the linear toh combination experiment."
     echo "  -h, --help       Show this help message and exit."
     echo
     echo "Example:"
@@ -32,6 +33,7 @@ mkdir -p data/journal/dao
 mkdir -p data/journal/stp
 mkdir -p data/journal/toh
 mkdir -p data/journal/linear
+mkdir -p data/journal/tohlinear
 
 # Parse command-line arguments
 stp_flag=false
@@ -40,6 +42,7 @@ pancake_flag=false
 road_flag=false
 dao_flag=false
 linear_flag=false
+toh_linear_flag=false
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -49,6 +52,7 @@ while [[ "$#" -gt 0 ]]; do
         -r|--road) road_flag=true ;;
         -d|--dao) dao_flag=true ;;
         -l|--linear) linear_flag=true ;;
+        --tohlinear) toh_linear_flag=true ;;
         -h|--help) usage ;;
         *) echo "Unknown option: $1"; usage ;;
     esac
@@ -111,4 +115,19 @@ if $linear_flag; then
   ./aij -d pancake -h gap-4 -i 0 -n 50 -a csbs -w 0.2780710517970431 0.2840565760503043 0.4378723721526526 | tee "../../../data/journal/linear/pancake_4_dif.out"
   ./aij -d pancake -h gap-5 -i 0 -n 50 -a csbs -w 0.13272495735150183 0.12430161967510664 0.7429734229733915 | tee "../../../data/journal/linear/pancake_5_inv.out"
   ./aij -d pancake -h gap-5 -i 0 -n 50 -a csbs -w 0.27742220313677785 0.2623391499380553 0.4602386469251668 | tee "../../../data/journal/linear/pancake_5_dif.out"
+fi
+
+if $toh_linear_flag; then
+  for i in "10+2" "8+4" "6+6"; do
+      ./aij -d toh -h "$i" -i 50 -n 50 -a csbs -w 1 0 0 | tee "../../../data/journal/tohlinear/toh_${i}_fd.out"
+      ./aij -d toh -h "$i" -i 50 -n 50 -a csbs -w 0 1 0 | tee "../../../data/journal/tohlinear/toh_${i}_df.out"
+      ./aij -d toh -h "$i" -i 50 -n 50 -a csbs -w 0 0 1 | tee "../../../data/journal/tohlinear/toh_${i}_g.out"
+  done
+
+./aij -d toh -h 10+2 -i 0 -n 50 -a csbs -w 0.5547498400249995 0.3994600037423087 0.045790156232691726 | tee "../../../data/journal/tohlinear/toh_10+2_inv.out"
+./aij -d toh -h 10+2 -i 0 -n 50 -a csbs -w 0.4655262644645583 0.4521246205022131 0.08234911503322863 | tee "../../../data/journal/tohlinear/toh_10+2_dif.out"
+./aij -d toh -h 8+4 -i 0 -n 50 -a csbs -w 0.463677529375743 0.39481111514016815 0.14151135548408875 | tee "../../../data/journal/tohlinear/toh_8+4_inv.out"
+./aij -d toh -h 8+4 -i 0 -n 50 -a csbs -w 0.4082743643325132 0.39227477521340764 0.19945086045407914 | tee "../../../data/journal/tohlinear/toh_8+4_dif.out"
+./aij -d toh -h 6+6 -i 0 -n 50 -a csbs -w 0.3800953821071525 0.37807119546363094 0.24183342242921646 | tee "../../../data/journal/tohlinear/toh_6+6_inv.out"
+./aij -d toh -h 6+6 -i 0 -n 50 -a csbs -w 0.3602211052399233 0.3594727314542066 0.2803061633058701 | tee "../../../data/journal/tohlinear/toh_6+6_dif.out"
 fi

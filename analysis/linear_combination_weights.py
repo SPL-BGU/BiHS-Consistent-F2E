@@ -1,4 +1,5 @@
 import pathlib
+import sys
 
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ def get_weight(df):
     gaps = df['heuristic'].unique().tolist()
     for gap in gaps:
         # Since we want a small number of expansions to have larger power, instead of x, we take 1/x
-        print(f"-------------------- GAP {gap} ------------------------------")
+        print(f"-------------------- Heuristic {gap} ------------------------------")
         e1 = df[(df['heuristic'] == gap) & (df['alg'] == algs[0])].iloc[0]['expansions']
         e2 = df[(df['heuristic'] == gap) & (df['alg'] == algs[1])].iloc[0]['expansions']
         e3 = df[(df['heuristic'] == gap) & (df['alg'] == algs[2])].iloc[0]['expansions']
@@ -81,14 +82,21 @@ def get_weight(df):
 
 
 def main():
-    output_dir = pathlib.Path(r'C:\Users\LiorS\My Drive\Projects\F2E Journal\Results\pancake_results.xlsx')
-    domain_dir = pathlib.Path(r'C:\Users\LiorS\My Drive\Projects\F2E Journal\Data\pancake')
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--pancake':
+            domain_dir = pathlib.Path(r'data\journal\linear')
+            output_dir = pathlib.Path(r'results\csvs\pancake_linear.csv')
+        elif sys.argv[1] == '--toh':
+            domain_dir = pathlib.Path(r'data\journal\tohlinear')
+            output_dir = pathlib.Path(r'results\csvs\toh_linear.csv')
+        else:
+            raise Exception("Unknown domain")
+    else:
+        raise Exception("Unknown domain")
     log_list = parse_dir(domain_dir)
     df = pd.DataFrame([vars(log) for log in log_list])
     verify_matching_solution_length(df)
     get_weight(df)
-    # df = df[df['instance'] < 50]
-    # df.to_excel(output_dir, index=False)
 
 
 if __name__ == '__main__':
