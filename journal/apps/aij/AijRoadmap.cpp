@@ -124,6 +124,13 @@ void TestSpecificRoadmap(const char *graph_path, const char *coordinates_path, i
         baelbs.emplace_back("tb-gfgd-fbi", RoadBAELB(ivGF, ivGD, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gdgf-fbi", RoadBAELB(ivGD, ivGF, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gb-fbi", RoadBAELB(ivGB, ivGB, SideCriterion::OptCount));
+        baelbs.emplace_back("tb-fd-d", RoadBAELB(ivF, ivD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-df-d", RoadBAELB(ivD, ivF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-g-d", RoadBAELB(ivG, ivG, SideCriterion::Decay));
+        baelbs.emplace_back("tb-b-d", RoadBAELB(ivB, ivB, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gfgd-d", RoadBAELB(ivGF, ivGD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gdgf-d", RoadBAELB(ivGD, ivGF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gb-d", RoadBAELB(ivGB, ivGB, SideCriterion::Decay));
 
         for (RoadBAELBPair &solver: baelbs) {
             if (alg == solver.first || alg == "tb" || alg == "all") {

@@ -201,6 +201,13 @@ void TestTohOfSize(int instanceId, int numOfInstances, const std::string &alg, c
         baelbs.emplace_back("tb-gfgd-fbi", ToHBAELB(ivGF, ivGD, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gdgf-fbi", ToHBAELB(ivGD, ivGF, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gb-fbi", ToHBAELB(ivGB, ivGB, SideCriterion::OptCount));
+        baelbs.emplace_back("tb-fd-d", ToHBAELB(ivF, ivD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-df-d", ToHBAELB(ivD, ivF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-g-d", ToHBAELB(ivG, ivG, SideCriterion::Decay));
+        baelbs.emplace_back("tb-b-d", ToHBAELB(ivB, ivB, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gfgd-d", ToHBAELB(ivGF, ivGD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gdgf-d", ToHBAELB(ivGD, ivGF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gb-d", ToHBAELB(ivGB, ivGB, SideCriterion::Decay));
 
         for (ToHBAELBPair &solver: baelbs) {
             if (alg == solver.first || alg == "tb" || alg == "all") {

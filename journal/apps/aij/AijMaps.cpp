@@ -201,6 +201,13 @@ void TestSpecificMap(const char *map, const char *scenario, int instanceId, int 
             baelbs.emplace_back("tb-gfgd-fbi", MapsBAELB(ivGF, ivGD, SideCriterion::OptCount, 1.0, 0.5));
             baelbs.emplace_back("tb-gdgf-fbi", MapsBAELB(ivGD, ivGF, SideCriterion::OptCount, 1.0, 0.5));
             baelbs.emplace_back("tb-gb-fbi", MapsBAELB(ivGB, ivGB, SideCriterion::OptCount, 1.0, 0.5));
+            baelbs.emplace_back("tb-fd-d", MapsBAELB(ivF, ivD, SideCriterion::Decay));
+            baelbs.emplace_back("tb-df-d", MapsBAELB(ivD, ivF, SideCriterion::Decay));
+            baelbs.emplace_back("tb-g-d", MapsBAELB(ivG, ivG, SideCriterion::Decay));
+            baelbs.emplace_back("tb-b-d", MapsBAELB(ivB, ivB, SideCriterion::Decay));
+            baelbs.emplace_back("tb-gfgd-d", MapsBAELB(ivGF, ivGD, SideCriterion::Decay));
+            baelbs.emplace_back("tb-gdgf-d", MapsBAELB(ivGD, ivGF, SideCriterion::Decay));
+            baelbs.emplace_back("tb-gb-d", MapsBAELB(ivGB, ivGB, SideCriterion::Decay));
 
             for (MapsBAELBPair &solver: baelbs) {
                 if (alg == solver.first || alg == "tb" || alg == "all") {

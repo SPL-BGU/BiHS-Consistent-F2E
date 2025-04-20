@@ -196,6 +196,13 @@ void TestPancakeOfSize(int instanceId, int numOfInstances, int gap,
         baelbs.emplace_back("tb-gfgd-fbi", PancakeBAELB(ivGF, ivGD, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gdgf-fbi", PancakeBAELB(ivGD, ivGF, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gb-fbi", PancakeBAELB(ivGB, ivGB, SideCriterion::OptCount));
+        baelbs.emplace_back("tb-fd-d", PancakeBAELB(ivF, ivD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-df-d", PancakeBAELB(ivD, ivF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-g-d", PancakeBAELB(ivG, ivG, SideCriterion::Decay));
+        baelbs.emplace_back("tb-b-d", PancakeBAELB(ivB, ivB, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gfgd-d", PancakeBAELB(ivGF, ivGD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gdgf-d", PancakeBAELB(ivGD, ivGF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gb-d", PancakeBAELB(ivGB, ivGB, SideCriterion::Decay));
 
         for (PancakeBAELBPair &solver: baelbs) {
             if (alg == solver.first || alg == "tb" || alg == "all") {
