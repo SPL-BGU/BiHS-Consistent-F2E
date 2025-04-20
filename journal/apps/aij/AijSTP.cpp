@@ -161,6 +161,13 @@ void TestStp4(const struct ArgParameters &ap) {
         baelbs.emplace_back("tb-gfgd-fbi", StpBAELB(ivGF, ivGD, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gdgf-fbi", StpBAELB(ivGD, ivGF, SideCriterion::OptCount));
         baelbs.emplace_back("tb-gb-fbi", StpBAELB(ivGB, ivGB, SideCriterion::OptCount));
+        baelbs.emplace_back("tb-fd-d", StpBAELB(ivF, ivD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-df-d", StpBAELB(ivD, ivF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-g-d", StpBAELB(ivG, ivG, SideCriterion::Decay));
+        baelbs.emplace_back("tb-b-d", StpBAELB(ivB, ivB, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gfgd-d", StpBAELB(ivGF, ivGD, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gdgf-d", StpBAELB(ivGD, ivGF, SideCriterion::Decay));
+        baelbs.emplace_back("tb-gb-d", StpBAELB(ivGB, ivGB, SideCriterion::Decay));
 
         for (StpBAELBPair &solver: baelbs) {
             if (ap.alg == solver.first || ap.alg == "tb" || ap.alg == "all") {

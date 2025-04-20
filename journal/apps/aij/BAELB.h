@@ -444,8 +444,8 @@ private:
     }
 
     void Expand(priorityQueue &current, priorityQueue &opposite, std::unordered_map<double, int> &currentValues,
-                nodeValue currHeapNum, Heuristic<state> *heuristic, Heuristic<state> *reverse_heuristic,
-                const state &target, const state &source);
+                double (&currentCounter)[2], nodeValue currHeapNum, Heuristic<state> *heuristic,
+                Heuristic<state> *reverse_heuristic, const state &target, const state &source);
 
     double calcBound(BoundValue bv, const AStarMultiOpenClosedData<state> &forwardNode,
                      const AStarMultiOpenClosedData<state> &backwardNode);
@@ -507,6 +507,9 @@ private:
 
     nodeValue forwardMainHeapNum;
     nodeValue backwardMainHeapNum;
+
+    double forwardCounter[2] = {0, 0};
+    double backwardCounter[2] = {0, 0};
 };
 
 template<class state, class action, class environment, class priorityQueue>
@@ -630,7 +633,7 @@ bool BAELB<state, action, environment, priorityQueue>::DoSingleSearchStep(std::v
         thePath.insert(thePath.end(), pBack.begin() + 1, pBack.end());
 
         // If the path is fully on one side
-        if (thePath.size() >=2 && thePath[thePath.size() - 1] == thePath[thePath.size() - 2]) {
+        if (thePath.size() >= 2 && thePath[thePath.size() - 1] == thePath[thePath.size() - 2]) {
             thePath.pop_back();
         }
 
@@ -641,13 +644,13 @@ bool BAELB<state, action, environment, priorityQueue>::DoSingleSearchStep(std::v
         case SideCriterion::Alt: {
             if (expandForward) {
                 Expand(forwardQueue, backwardQueue,
-                       forwardValues, forwardMainHeapNum,
+                       forwardValues, forwardCounter, forwardMainHeapNum,
                        forwardHeuristic, backwardHeuristic,
                        goal, start);
                 expandForward = false;
             } else {
                 Expand(backwardQueue, forwardQueue,
-                       backwardValues, backwardMainHeapNum,
+                       backwardValues, backwardCounter, backwardMainHeapNum,
                        backwardHeuristic, forwardHeuristic,
                        start, goal);
                 expandForward = true;
@@ -657,12 +660,12 @@ bool BAELB<state, action, environment, priorityQueue>::DoSingleSearchStep(std::v
         case SideCriterion::Cardinality: {
             if (forwardQueue.OpenSize() > backwardQueue.OpenSize()) {
                 Expand(backwardQueue, forwardQueue,
-                       backwardValues, backwardMainHeapNum,
+                       backwardValues, backwardCounter, backwardMainHeapNum,
                        backwardHeuristic, forwardHeuristic,
                        start, goal);
             } else {
                 Expand(forwardQueue, backwardQueue,
-                       forwardValues, forwardMainHeapNum,
+                       forwardValues, forwardCounter, forwardMainHeapNum,
                        forwardHeuristic, backwardHeuristic,
                        goal, start);
             }
@@ -672,14 +675,55 @@ bool BAELB<state, action, environment, priorityQueue>::DoSingleSearchStep(std::v
             if (forwardValues[getNodePriority(forwardQueue.Lookat(forwardQueue.Peek()), forwardMainHeapNum)] >
                 backwardValues[getNodePriority(backwardQueue.Lookat(backwardQueue.Peek()), backwardMainHeapNum)]) {
                 Expand(backwardQueue, forwardQueue,
-                       backwardValues, backwardMainHeapNum,
+                       backwardValues, backwardCounter, backwardMainHeapNum,
                        backwardHeuristic, forwardHeuristic,
                        start, goal);
             } else {
                 Expand(forwardQueue, backwardQueue,
-                       forwardValues, forwardMainHeapNum,
+                       forwardValues, forwardCounter, forwardMainHeapNum,
                        forwardHeuristic, backwardHeuristic,
                        goal, start);
+            }
+            break;
+        }
+        case SideCriterion::Decay: {
+            auto forwardFactor = DBL_MAX;
+            auto backwardFactor = DBL_MAX;
+            if (forwardCounter[0] > forwardCounter[1]) {
+                auto currLevelSize = forwardValues[getNodePriority(forwardQueue.Lookat(forwardQueue.Peek()),
+                                                                   forwardMainHeapNum)];
+                forwardFactor = currLevelSize / (1 - forwardCounter[1] / forwardCounter[0]);
+            }
+
+            if (backwardCounter[0] > backwardCounter[1]) {
+                auto currLevelSize = backwardValues[getNodePriority(backwardQueue.Lookat(backwardQueue.Peek()),
+                                                                    backwardMainHeapNum)];
+                backwardFactor = currLevelSize / (1 - backwardCounter[1] / backwardCounter[0]);
+            }
+            if (forwardFactor > backwardFactor) {
+                Expand(backwardQueue, forwardQueue,
+                       backwardValues, backwardCounter, backwardMainHeapNum,
+                       backwardHeuristic, forwardHeuristic,
+                       start, goal);
+            } else if (forwardFactor < backwardFactor) {
+                Expand(forwardQueue, backwardQueue,
+                       forwardValues, forwardCounter, forwardMainHeapNum,
+                       forwardHeuristic, backwardHeuristic,
+                       goal, start);
+            } else {
+                if (expandForward) {
+                    Expand(forwardQueue, backwardQueue,
+                           forwardValues, forwardCounter, forwardMainHeapNum,
+                           forwardHeuristic, backwardHeuristic,
+                           goal, start);
+                    expandForward = false;
+                } else {
+                    Expand(backwardQueue, forwardQueue,
+                           backwardValues, backwardCounter, backwardMainHeapNum,
+                           backwardHeuristic, forwardHeuristic,
+                           start, goal);
+                    expandForward = true;
+                }
             }
             break;
         }
@@ -694,12 +738,13 @@ bool BAELB<state, action, environment, priorityQueue>::DoSingleSearchStep(std::v
 template<class state, class action, class environment, class priorityQueue>
 void BAELB<state, action, environment, priorityQueue>::Expand(priorityQueue &current, priorityQueue &opposite,
                                                               std::unordered_map<double, int> &currentValues,
+                                                              double (&currentCounter)[2],
                                                               nodeValue currHeapNum,
                                                               Heuristic<state> *heuristic,
                                                               Heuristic<state> *reverse_heuristic,
                                                               const state &target, const state &source) {
     //1. if current closed in opposite direction
-    // 1a. Remove descendents of current in open
+    // 1a. Remove descendants of current in open
 
     uint64_t nextID;
     bool success = false;
@@ -720,6 +765,7 @@ void BAELB<state, action, environment, priorityQueue>::Expand(priorityQueue &cur
     // 2a. Check for bidirectional solution
 
     bool foundBetterSolution = false;
+    currentCounter[0] += 1;
     nodesExpanded++;
 
     counts[getLowerBound(false)] += 1;
@@ -759,6 +805,9 @@ void BAELB<state, action, environment, priorityQueue>::Expand(priorityQueue &cur
                 break;
             case kOpenList: { // Update cost if needed
                 if (fless(parentData.g + edgeCost, childData.g)) {
+                    if (getNodePriority(childData, currHeapNum) == getNodePriority(parentData, currHeapNum)) {
+                        currentCounter[1] += 1;
+                    }
                     currentValues[getNodePriority(childData, currHeapNum)] -= 1;
                     childData.parentID = nextID;
                     childData.g = parentData.g + edgeCost;
@@ -782,12 +831,17 @@ void BAELB<state, action, environment, priorityQueue>::Expand(priorityQueue &cur
                 double h = std::max(heuristic->HCost(succ, target), epsilon);
                 double rh = reverse_heuristic->HCost(succ, source);
 
-                // Ignore nodes that don't have lower f-cost than the incumbant solution
+                // Ignore nodes that don't have lower f-cost than the incumbent solution
                 if (!fless(g + h, currentCost))
                     break;
 
+                if (getNodePriority(g, h, rh, currHeapNum) == getNodePriority(parentData, currHeapNum)) {
+                    currentCounter[1] += 1;
+                }
                 current.AddOpenNode(succ, hash, g, h, rh, nextID);
                 currentValues[getNodePriority(g, h, rh, currHeapNum)] += 1;
+
+
                 // Check for solution
                 uint64_t reverseLoc;
                 if (opposite.Lookup(hash, reverseLoc) == kOpenList) {

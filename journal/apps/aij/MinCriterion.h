@@ -24,7 +24,7 @@ enum MinCriterion {
 
 
 enum SideCriterion {
-    Alt, Cardinality, OptCount
+    Alt, Cardinality, OptCount, Decay
 };
 
 
