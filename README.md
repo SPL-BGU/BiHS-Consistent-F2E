@@ -75,15 +75,14 @@ As said before, all of these rely on HOG2 which can be found [here](https://gith
 
 If you find our work interesting or the repo useful, please consider citing this paper:
 ```
-@inproceedings{siag2023front,
-  author       = {Lior Siag and
-                  Shahaf S. Shperberg and
-                  Ariel Felner and
-                  Nathan R. Sturtevant},
-  title        = {Front-to-End Bidirectional Heuristic Search with Consistent Heuristics:
-                  Enumerating and Evaluating Algorithms and Bounds},
-  booktitle    = {{IJCAI}},
-  pages        = {5631--5638},
-  year         = {2023}
+@article{siag2025bridging,
+	title = {Bridging theory and practice in bidirectional heuristic search with front-to-end consistent heuristics},
+	author = {Lior Siag and Shahaf S. Shperberg},
+	journal = {Artificial Intelligence},
+	volume = {348},
+	pages = {104420},
+	year = {2025},
+	issn = {0004-3702},
+	doi = {https://doi.org/10.1016/j.artint.2025.104420},
 }
 ```
